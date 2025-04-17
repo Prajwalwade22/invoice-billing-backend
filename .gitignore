@@ -1,0 +1,26 @@
+# Ignore Visual Studio files
+.vs/
+.vscode/
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+# Ignore build files
+bin/
+obj/
+build/
+
+# Ignore log files
+*.log
+
+# Ignore temporary files
+*.swp
+
+# Secrets
+InvoiceBillingSystem/wwwRoot/credentials/google-drive-service-account.json
+InvoiceBillingSystem/appsettings.json
+InvoiceBillingSystem/Services/NotificationService.cs
+
+
+
