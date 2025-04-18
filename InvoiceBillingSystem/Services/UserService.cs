@@ -56,8 +56,9 @@ namespace InvoiceBillingSystem.Services
 
             await _userActivityService.LogUserActivityAsync(user.Id);
             await _AuditlogService.LogActionAsync("Registeration Done", user.Email, "Registeration Done And OTP Is Send To Email And MobileNumber");
-            await _OtpService.GenerateAndSendOTPAsync(user.Id, user.Email, user.Phone);
             await _userRepository.CreateUserAsync(user);
+            await _OtpService.GenerateAndSendOTPAsync(user.Id,user.Email, user.Phone);
+            //await _userRepository.CreateUserAsync(user);
             return "User registered successfully.";
         }
 

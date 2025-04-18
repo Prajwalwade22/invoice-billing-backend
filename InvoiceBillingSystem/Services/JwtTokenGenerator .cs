@@ -12,6 +12,7 @@ namespace InvoiceBillingSystem.Services
     public class JwtTokenGenerator : IJwtTokenGenerator
     {
         private readonly IConfiguration _configuration;
+        private readonly string token = string.Empty;
 
         public JwtTokenGenerator(IConfiguration configuration)
         {
@@ -40,5 +41,34 @@ namespace InvoiceBillingSystem.Services
             return tokenHandler.WriteToken(token);
         }
 
+        public Guid GetUserId()
+        {
+            if (!string.IsNullOrEmpty(token))
+            {
+                var principal = GetPrincipalFromAccessToken(token);
+                var userId = principal.Claims.FirstOrDefault(x => x.Type == "UserId")?.Value ?? "";
+                if (!string.IsNullOrEmpty(userId))
+                    return new Guid(userId);
+            }
+            return Guid.Empty;
+        }
+
+        public ClaimsPrincipal? GetPrincipalFromAccessToken(string? token)
+        {
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = false,
+                ValidateIssuer = false,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JsonWebTokenKeys:AccessToken"])),
+                ValidateLifetime = false,
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+            if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                throw new SecurityTokenException("Invalid token");
+            return principal;
+        }
     }
 }

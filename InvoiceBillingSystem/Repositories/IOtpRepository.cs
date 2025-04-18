@@ -9,5 +9,7 @@ namespace InvoiceBillingSystem.Repositories
         Task<OTP> GetOTPAsync(Guid userId, string otpCode);
 
         Task MarkOTPAsVerifiedAsync(OTP otp);
+
+        Task MarkExpiredUnverifiedOtpsAsVerifiedAsync();
     }
 }

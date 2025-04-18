@@ -30,5 +30,23 @@ namespace InvoiceBillingSystem.Repositories
             otp.IsVerified = true;
             await _context.SaveChangesAsync();
         }
+
+        public async Task MarkExpiredUnverifiedOtpsAsVerifiedAsync()
+        {
+            var expiredOtps = await _context.OTP
+                .Where(o => !o.IsVerified && o.ExpiryTime < DateTime.UtcNow)
+                .ToListAsync();
+
+            if (expiredOtps.Any())
+            {
+                foreach (var otp in expiredOtps)
+                {
+                    otp.IsVerified = true;
+                }
+
+                _context.OTP.UpdateRange(expiredOtps);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

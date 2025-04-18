@@ -5,6 +5,7 @@ using System.Net.Mail;
 using System.Net;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
+using Google.Apis.Drive.v3.Data;
 
 namespace InvoiceBillingSystem.Services
 {
@@ -16,7 +17,12 @@ namespace InvoiceBillingSystem.Services
 
         private readonly IConfiguration _configuration;
 
-        public OTPService(IOtpRepository otpRepository, INotificationService notificationService, IConfiguration configuration)
+        private readonly IJwtTokenGenerator _jwtTokenGenerator;
+
+        public Guid UserId;
+
+
+        public OTPService(IOtpRepository otpRepository, INotificationService notificationService, IConfiguration configuration, IJwtTokenGenerator jwtTokenGenerator)
         {
             _Otprepository = otpRepository;
             _notificationService = notificationService;
@@ -34,16 +40,18 @@ namespace InvoiceBillingSystem.Services
             }
         }
 
-        public async Task<bool> GenerateAndSendOTPAsync(Guid userId, string email, string phone)
+        public async Task<bool> GenerateAndSendOTPAsync(Guid userid,string email, string phone)
         {
             string otpCode = GenerateOTP();
             var otp = new OTP
             {
-                UserId = userId,
+                UserId = userid,
                 Code = otpCode,
-                ExpiryTime = DateTime.UtcNow.AddMinutes(5)
+                CreatedAt=DateTime.UtcNow,
+                ExpiryTime = DateTime.UtcNow.AddMinutes(20)
             };
 
+            await _Otprepository.MarkExpiredUnverifiedOtpsAsVerifiedAsync();
             await _Otprepository.SaveOTPAsync(otp);
 
             string message = $"Enter Your OTP Code At The Time Of Login.The Code Is: {otpCode}. It is valid for 5 minutes.";
