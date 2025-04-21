@@ -50,7 +50,7 @@ namespace InvoiceBillingSystem.Controllers
             var success = await _userService.AssignRoleAsync(userId, role);
             if (!success) return BadRequest("Failed to assign role.");
 
-            return Ok("Role assigned successfully.");
+            return Ok("The Role has been assigned successfully.");
         }
 
 
