@@ -48,7 +48,7 @@ namespace InvoiceBillingSystem.Controllers
         public async Task<IActionResult> AssignRole(Guid userId, string role)
         {
             var success = await _userService.AssignRoleAsync(userId, role);
-            if (!success) return BadRequest("Failed to assign role.");
+            if (!success) return BadRequest("We have been very Failed to assign role.");
 
             return Ok("The Role has been assigned successfully.");
         }
