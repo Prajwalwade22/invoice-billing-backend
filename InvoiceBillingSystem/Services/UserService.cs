@@ -98,7 +98,7 @@ namespace InvoiceBillingSystem.Services
             if (user == null) return false;
 
             user.Role = role;
-            await _userRepository.CreateUserAsync(user);
+            await _userRepository.UpdateUserAsync(user);
             return true;
         }
 

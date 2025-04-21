@@ -6,7 +6,7 @@ namespace InvoiceBillingSystem.Repositories
     {
         Task<User?> GetUserByEmailAsync(string email);
         Task<User> CreateUserAsync(User user);
-
+        Task<User> UpdateUserAsync(User user);
         Task<User?> GetUserByIdAsync(Guid UserId);
 
         Task<Admin> CreateAdminAsync(Admin admin);

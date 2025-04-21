@@ -11,6 +11,7 @@ namespace InvoiceBillingSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class InvoicesController : ControllerBase
     {
         private readonly IInvoiceService _invoiceService;
@@ -27,13 +28,24 @@ namespace InvoiceBillingSystem.Controllers
             _refundService = refundService; 
         }
 
-        [HttpPost]  
-      //  [RequireRole("Admin", "Accountant")]
-
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        //  [RequireRole("Admin", "Accountant")]
         public async Task<IActionResult> CreateInvoice([FromBody] CreateInvoiceDto invoiceDto)
         {
-            var invoice = await _invoiceService.CreateInvoiceAsync(invoiceDto);
-            return Ok(invoice);
+            try
+            {
+                var invoice = await _invoiceService.CreateInvoiceAsync(invoiceDto);
+                return Ok(invoice);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
+            }
         }
 
         [HttpGet("{invoiceId}")]

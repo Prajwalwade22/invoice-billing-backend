@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.Design;
 using Google.Apis.Drive.v3.Data;
 using InvoiceBillingSystem.DTO;
+using InvoiceBillingSystem.Enum;
 using InvoiceBillingSystem.Models;
 using InvoiceBillingSystem.Repositories;
 
@@ -15,9 +16,12 @@ namespace InvoiceBillingSystem.Services
         private readonly CurrencyConverterService _currencyConverterService;
         private readonly IUserRepository _userRepository;
         private readonly IConfiguration _Configuration;
+        private readonly IJwtTokenGenerator jwtTokenGenerator;
 
+        private readonly UserRoles _userRole;
+        public Guid userId;
 
-        public InvoiceService(IInvoiceRepository invoiceRepository,INotificationService notificationService,IAuditLogService auditLogService,IDiscountService discountService,CurrencyConverterService currencyConverterService,IUserRepository userRepository,IConfiguration configuration)
+        public InvoiceService(IInvoiceRepository invoiceRepository,INotificationService notificationService,IAuditLogService auditLogService,IDiscountService discountService,CurrencyConverterService currencyConverterService,IUserRepository userRepository,IConfiguration configuration,IJwtTokenGenerator jwtTokenGenerator)
         {
             _invoiceRepository = invoiceRepository;
             _notificationService = notificationService;
@@ -26,10 +30,16 @@ namespace InvoiceBillingSystem.Services
             _currencyConverterService = currencyConverterService;
             _userRepository = userRepository;
             _Configuration = configuration;
+            userId = jwtTokenGenerator.GetUserId();
+            var roleStr = jwtTokenGenerator.GetUserRole(); 
         }
 
         public async Task<InvoiceDto> CreateInvoiceAsync(CreateInvoiceDto invoiceDto)
-        { 
+        {
+            if (_userRole != UserRoles.Admin)
+            {
+                throw new UnauthorizedAccessException("Only Admins are allowed to create invoices.");
+            }
             var user=await _userRepository.GetUserByIdAsync(invoiceDto.UserId);
             if (user == null)
             {

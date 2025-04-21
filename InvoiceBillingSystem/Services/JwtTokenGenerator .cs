@@ -13,10 +13,12 @@ namespace InvoiceBillingSystem.Services
     {
         private readonly IConfiguration _configuration;
         private readonly string token = string.Empty;
+        private readonly IHttpContextAccessor _contextAccessor;
 
-        public JwtTokenGenerator(IConfiguration configuration)
+        public JwtTokenGenerator(IConfiguration configuration,IHttpContextAccessor httpContextAccessor)
         {
             _configuration = configuration;
+            _contextAccessor = httpContextAccessor;
         }
 
         public string GenerateToken(Guid userId, string email, string role)
@@ -30,10 +32,12 @@ namespace InvoiceBillingSystem.Services
                 {
             new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
             new Claim(ClaimTypes.Email, email),
-            new Claim(ClaimTypes.Role, role)
-            //new Claim(ClaimTypes.Role, role.ToString())
+            //new Claim(ClaimTypes.Role, role)
+            new Claim(ClaimTypes.Role,role.ToString())
         }),
                 Expires = DateTime.UtcNow.AddHours(1),
+                Issuer = _configuration["Jwt:Issuer"],        
+                Audience = _configuration["Jwt:Audience"],
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
             };
 
@@ -52,6 +56,12 @@ namespace InvoiceBillingSystem.Services
             }
             return Guid.Empty;
         }
+        public string GetUserRole()
+        {
+            var role = _contextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value;
+            return role ?? throw new UnauthorizedAccessException("Role not found in token.");
+        }
+
 
         public ClaimsPrincipal? GetPrincipalFromAccessToken(string? token)
         {

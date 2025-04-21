@@ -51,7 +51,7 @@ namespace InvoiceBillingSystem.Services
                 ExpiryTime = DateTime.UtcNow.AddMinutes(20)
             };
 
-            await _Otprepository.MarkExpiredUnverifiedOtpsAsVerifiedAsync();
+            //await _Otprepository.MarkExpiredUnverifiedOtpsAsVerifiedAsync();
             await _Otprepository.SaveOTPAsync(otp);
 
             string message = $"Enter Your OTP Code At The Time Of Login.The Code Is: {otpCode}. It is valid for 5 minutes.";
